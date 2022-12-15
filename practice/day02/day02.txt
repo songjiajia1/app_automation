@@ -1,0 +1,158 @@
+一.Genymotion模拟器设备中安装App
+1.情况一:如果已经发布的正式版的App需要做用户验收测试(UAT),可以从应用商店下载
+2.情况二:如果还未发布,需要向开发人员索要apk格式的安装包
+教学环境下: D:\Apks
+3.说明:Genymotion模拟器基于x86架构的,所以无法安装基于ARM架构所编译的App
+解决方案:需要在Genymotion模拟器设备里先安装相应的Android版本的ARM转换器,具体操作为
+	a.找到D:\Software tools\Appium的Genymotion-ARM-Translation_6.0.zip和ARM_Translation_Oreo_8.0.zip
+	b.如果拖拽后能正常安装(提示:flash字样),就可以通过这样的拖拽方式来安装，点击OK后，提示"has been flashed successfully"，点击OK，最后重启模拟器设备。
+	c.如果拖拽后无法安装（copied）,那么需要使用命令来安装,启动cmd,输入以下命令
+示例1:Android 6.0
+	adb devices
+	adb push "D:\Software tools\Appium\Genymotion-ARM-Translation_6.0.zip" /sdcard/Download/
+	adb shell flash-archive.sh /sdcard/Download/Genymotion-ARM-Translation_6.0.zip
+最后命令行里提示：Result:OK就代表安装成功。也需要重启模拟器设备才生效。
+
+示例2:Android 8.0
+	adb devices
+	adb push "D:\Software tools\Appium\ARM_Translation_Oreo_8.0.zip" /sdcard/Download/
+	adb shell flash-archive.sh /sdcard/Download/ARM_Translation_Oreo_8.0.zip
+	d.重启模拟器设备,adb devices
+4.安装App到设备上
+(1)先试着拖拽xxx.apk到设备中安装
+(2)如果拖拽报错的话,使用命令来安装
+	adb devices
+	adb install D:\Apks\app2-debug.apk
+注意：如果路径中有空格，需要将路径和文件名用双引号来表示，例如
+	adb install "D:\My Apks\app2-debug.apk"
+
+练习：Android6.0设备里安装de.penguindevelopers.paint_2.0_liqucn.com.apk（画图板）
+
+5.卸载App:进入设备=>设置=>应用=>点击目标App=>点击"强行停止",提示框上点击"确定"=>点击"卸载",提示框上点击"确定"
+
+案例:D:\Apks\app2-debug.apk,App名称是MyAppDemo2
+
+二.自动化测试脚本代码基础
+1.安装准备Python和Pycharm,新建工程MyAppiumProject1,新建包,新建模块
+2.第一步:导入appium里的webdriver模块
+from appium import webdriver
+3.第二步:启动被测的应用程序(App)
+(1)先新建DesiredCapabilities对象:该对象用于描述启动App时的一些必要的参数信息,以key-value键值对的形式来表示JSON格式对象,在Python语言实现时,是使用字典类型来表示该对象的
+	a.参数信息包含:测试的是那台设备,使用的是什么测试引擎,设备的操作系统是什么,是什么版本的操作系统,测试的App是哪个,App的启动界面又是哪个,以及一些其他必要的配置信息
+	b.创建该对象的语法格式,参考Python语言里字典的语法格式实现,字典有两种实现语法格式
+语法格式一:
+变量={}
+变量["键1"]=值1
+变量["键2"]=值2
+语法格式二:
+变量={"键1":值1,
+       "键2":值2}
+(2)再实例化webdriver模块里的Remote类对象,构造函数的参数有两个:一个是http请求的请求地址,另一个就是DesiredCapabilities对象
+# 实例化
+driver=webdriver.Remote("http://127.0.0.1:4723/wd/hub",dc)
+# 关闭App
+driver.quit()
+4.Desired Capabilites对象里常见的key(键):
+(1)automationName:一般不用设置,代表自动化测试引擎
+	a.默认值是Appium
+	b.当测试的Android低于4.2.2(也就是Android API版本低于17)的话,就需要给该key设置值为Seledroid
+	c.当测试过程中在Android高版本(例如7.0,8.0以上)中运行时有一些特殊处理,例如消息框无法定位,不能使用Appium作为测试引擎,需要给该key设置值为UiAutomator2
+实例：
+dc["automationName"]="UiAutomator2"
+
+(2)platformName:平台名称,必填项
+	a.是指待测的App是在什么操作系统平台上运行
+	b.值有:Android,iOS
+示例:dc["platformName"]="Android"
+(3)platformVersion:平台版本号,必填项
+	a.是指移动端操作系统平台的版本号
+	b.说明:不需要书写小版本号,比如6.0.0,只需要书写6.0即可
+示例:dc["platformVersion"]="6.0"
+(4)deviceName:设备名称,必填项
+	a.用于描述手机厂商和型号
+	b.书写的值有偏差,运行不受影响
+	c.如果Android模拟器,建议设置该key的值为Android Emulator
+示例:dc["deviceName"]="Android Emulator"
+(5)udid:设备标识号,只有真机需要填写,模拟器不需要添加该key
+	a.如果是真机,必须要设置该值
+	b.该key的值使用adb devices命令可以查看到
+C:\Users\zhang>adb devices
+List of devices attached
+saddas223321mklfdjsdf     device
+
+dc["udid"]="saddas223321mklfdjsdf"
+
+(6)app:App的安装包的路径,一般是本地绝对路径,也可以支持网络路径(需要有访问权限)
+	a.是可选项,如果已经提前手动安装这个App到设备上,那么可以不用增加该key
+	b.如果希望启动该App之前,检查是否已安装,没安装的情况下能够自动安装,那么就设置该key的值
+	c.不管是否提前安装App,建议初学者增加该key的值
+	d.注意:文件路径中的分割符\需要经过转义后写在str中,转义字符\\代表真实的路径中的一个\
+示例:
+dc["app"]="D:\\Apks\\app2-debug.apk"
+(7)browserName:浏览器名称,可选参数,只有通过移动端设备里的浏览器来访问的被测系统(Wap网站)测试时,才需要设置该key的值
+	a.对于Android系统测试,如果使用系统自带的默认浏览器,该key的值设置为Browser,如果安装了Chrome浏览器,可以设置为Chrome
+	b.对于iOS来说,一般设置为Safari
+	c.说明:app和browserName不同时出现
+(8)appPackage:Android特有的key,代表被测App的Java程序包的包名,是Android系统中App测试时的必填项---很重要!
+(9)appActivity:Android特有的key,代表被测App的活动名称,可以理解为App上的一个一个的界面,例如登录界面,注册界面等,是Android系统中App测试时的必填项---很重要!
+(10)unicodeKeyboard:是否使用unicode键盘输入来支持中文和特殊字符,值有True和False两个bool类型的数据,默认值是False,建议设置为True
+示例:dc["unicodeKeyboard"]=True
+(11)resetKeyboard:是否在使用unicode键盘输入完后重置输入法为原有默认状态,也就是隐藏中文输入的键盘,和unicodeKeyboard的key一起使用,值有True和False两个bool类型的数据,默认值是False,建议设置为True
+示例:dc["resetKeyboard"]=True
+5.调查appPackage和appActivity的值:
+(1)方法一:使用aapt反编译apk来获取---常用!!!
+	a.aapt就是Android资源打包工具,在android sdk的build-tools里可以找到该工具
+D:\Program Files\android-sdk-windows\build-tools\28.0.3\aapt.exe
+	b.该工具所在的路径需要加入系统环境变量Path里
+D:\Program Files\android-sdk-windows\build-tools\28.0.3
+	c.启动cmd,输入aapt dump badging apk路径
+示例:
+aapt dump badging D:\Apks\app2-debug.apk
+aapt dump badging "D:\My Apks\app2-debug.apk"
+
+	d.查看输出结果中的第一行package:name='……'后单引号里的内容就是appPackage这个key的值
+	e.查看输出结果中的中间位置launchable-activity:name='……'后单引号里的内容就是appActivity这个key的值
+
+案例:MyAppDemo2   app2-debug.apk
+dc["appPackage"]="com.example.tarena.myappdemo2"
+dc["appActivity"]=".MainActivity2"
+
+com.example.tarena.myappdemo2.MainActivity2
+.MainActivity2
+
+
+练习:MyAppDemo3   app3-debug.apk
+aapt dump badging D:\Apks\app3-debug.apk
+appPackage   com.example.myappdemo3
+appActivity   com.example.myappdemo3.MainActivity
+
+练习:app-welcome.apk
+com.example.power.welcomepage
+com.example.power.welcomepage.WelcomeActivity
+
+(2)方法二:可以适用于无apk的情况,但是要求你的设备上已经安装该App
+	a.在设备上启动该App,展示出它的初始界面---很重要!!!
+	b.启动cmd,使用adb devices确认已经连接
+	c.输入adb shell进入Android操作系统内部,使用Linux命令来查看相关信息
+	d.输入命令
+dumpsys activity|grep mResumedActivity
+	e.在结果中查看/前的字符串是appPackage这个key的值,/后的字符串是appActivity这个key的值
+示例:
+    mResumedActivity: ActivityRecord{119cb44 u0 com.android.calculator2/.Calculator t20}
+那么结论是:
+appPackage  com.android.calculator2
+appActivity   .Calculator
+注意：空格前后的字符不要复制下来。
+
+案例:Android自带的计算器
+练习:Android自带的日历
+com.android.calendar
+.AllInOneActivity
+
+(3)方法六:与方法2类似,命令不同
+	a.在设备里启动App,展示初始界面
+	b.启动cmd,输入命令
+adb shell dumpsys window|findstr mCurrent
+	c.查看结果中/前是appPackage的值,/后就是appActivity的值
+
+

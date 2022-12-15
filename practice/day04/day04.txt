@@ -1,0 +1,130 @@
+练习:D:\Apks\ContactManager.apk
+Contact Manager
+使用Inspector录制该App中勾选复选框，点击Add Contact按钮，输入ContactName为jack，输入ContactPhone为13012345678，输入ContactEmail为jack@163.com，选择Email后下拉列表中的“工作”的步骤，转换为Python格式，粘贴到demo4001.py中启动App之后，等待之前，关闭Inspector，运行调试代码。
+
+com.example.android.contactmanager
+com.example.android.contactmanager.ContactManager
+
+问题：Pycharm日志里右侧出现[WinError 10061] 由于目标计算机积极拒绝，无法连接。
+原因：Appium Server未开启
+
+一.定位页面元素的方法
+1.MobileBy对象:是Appium针对移动端控件定位条件的描述所封装的对象
+(1)MobileBy类继承自selenium模块里的By类,所以导入MobileBy以后,就不需要再导入By了,因为子类对象可以使用父类所封装的属性和函数
+(2)导入MobileBy的语法:from appium.webdriver.common.mobileby import MobileBy
+2.常用的定位方法:
+(1)id定位
+(2)name定位:旧版本支持,1.5以上的新版本Appium不支持
+(3)class_name定位
+(4)accessibility_id定位
+(5)xpath定位
+(6)css_selector定位
+(7)android_uiautomator定位
+3.id定位:使用元素的resource-id属性的值来定位
+示例1:使用完整的resouce-id属性值做参数
+fxk=driver.find_element(MobileBy.ID,"com.example.android.contactmanager:id/showInvisible")
+示例2:使用resource-id属性值中/后的部分作为参数
+an=driver.find_element(MobileBy.ID,"addContactButton")
+
+案例:ContactManager的复选框,点击它,点击Add Contact按钮
+
+"D:\Program Files\android-sdk-windows\tools\uiautomatorviewer.bat"
+
+练习:新建demo4003.py,启动计算器,点击8,点击+,点击3,点击=,等待3秒,关闭App
+要求：书写代码，不是录制。
+
+4.name定位:使用元素的text属性值来定位,在新版本Appium里已经不支持该种定位方法,所以不建议使用---了解
+5.class_name定位:使用元素的class属性值来定位,在移动端App源代码中元素的class属性值描述的是控件的类型(按钮,文本框,纯文本等)
+(1)说明:有时定位不准确,因为一个页面上同类型的元素可能不止一个
+(2)find_element可以找到满足条件的第一个元素
+示例:
+an=driver.find_element(MobileBy.CLASS_NAME,"android.widget.Button")
+(3)find_elements可以找到满足条件的所有元素,返回值是一个list,可以使用索引号获得列表里指定编号的那个元素
+示例:
+an7=driver.find_elements(MobileBy.CLASS_NAME,"android.widget.Button")[6]
+
+练习：复制demo4003.py为demo4005.py，修改代码将所有步骤都改为class_name定位。
+
+练习:复制demo4002.py为demo4004.py,删除启动和关闭App之间的步骤,书写代码使用class_name定位来点击复选框,然后点击按钮
+
+6.accessibility_id定位:使用元素的content-desc属性的值来定位,如果该属性不为空建议使用这种定位方法
+示例:
+ch=driver.find_element(MobileBy.ACCESSIBILITY_ID,"乘")
+
+练习:复制demo4002.py为demo4006.py,删除启动和关闭App之间的步骤,书写代码使用accessibility_id定位来点击复选框,然后再点击按钮。
+
+7.xpath定位:---重要!!
+(1)说明:移动App的页面源代码是XML语言的,所以xpath定位是可以使用的
+(2)Inspector工具,建议使用xpath定位时,xpath表达式可以从Inspector界面最右侧获得
+(3)xpath分为:
+	a.绝对路径xpath:从根节点hierarchy开始书写,按照XML文档里的层级一层一层向下描述---不建议使用!
+示例:
+/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.support.v4.view.ViewPager/android.widget.LinearLayout/android.view.ViewGroup[1]/android.widget.Button[2]
+	b.相对路径xpath:以//开头
+示例:
+//android.widget.Button[@content-desc="等于"]
+//android.widget.Button
+(4)说明:在移动端页面源代码的XML文档中,书写xpath表达式时,需要使用元素的class属性值作为标记名称来使用
+(5)检查xpath是否正确:Inspector工具栏的倒数第三个按钮(Search For Element,放大镜图标)
+	a.启动Inspector的Session,点击Inspector工具栏的倒数第三个按钮
+	b.选择Locator Strategy定位策略为xpath,在Selector文本框中输入xpath表达式,点击Search按钮
+	c.查看结果Elements后小括号内的整数,该整数代表查找到的结果数,然后可以双击其下列表中的每个数字,就会在左侧界面截图中高亮能定位到的每个元素
+(6)xpath语法:应用于Android界面XML
+	a.谓词是索引号,代表同父节点下兄弟中它是第几个,从1开始编号
+示例:
+//android.widget.TableRow[4]/android.widget.EditText[1]
+
+//android.widget.Button[1]  --- 7和DEL
+//android.widget.Button[9]   ---3
+//android.view.ViewGroup[1]/android.widget.Button[1]   --- 7
+//android.view.ViewGroup[2]/android.widget.Button[3]  --- x
+
+	b.谓词使用某属性等于某值
+示例:
+//android.widget.Button[@index='5']
+//android.widget.Button[@text='6']
+//android.widget.Button[@resource-id='com.android.calculator2:id/digit_6']
+//android.widget.Button[@content-desc='等于']
+
+//android.widget.EditText[@resource-id='com.example.android.contactmanager:id/contactEmailEditText']
+
+	c.多条件筛选:多个[]或使用and连接多个条件
+示例:
+//android.widget.Button[@index='5'][@text='6']
+//android.widget.Button[@index='5' and @text='6']
+
+//android.widget.Button[@index='3' and @text='4']
+
+index	3
+text	4
+class	android.widget.Button
+
+	d.通配符:*可以用于标记名称或属性名称的位置
+示例:
+//*[@text='5']
+
+//*[@*='5']
+
+	e.contains函数:第一个参数包含第二个参数
+示例:等号
+//*[contains(@resource-id,'eq')]
+	f.表达式中间可以加//代表祖先与后代的关系
+示例:
+//android.support.v4.view.ViewPager//android.widget.Button[8]   --- 2
+	g.表达式中间可以加/..代表上一级(父节点)
+示例:
+//*[@text='7']/../../*[2]/*[3]  --- x
+	h.xpath里轴关键字来实现高级定位,可以按照一定的关系来查找 ---了解!!!
+轴关键字:
+哥哥:preceding-sibling
+弟弟:following-sibling
+祖先:ancestor
+示例:
+//*[@text='8']/preceding-sibling::*  ---7
+//*[@text='8']/preceding-sibling::android.widget.Button    ---7
+
+//*[@text='8']/following-sibling::android.widget.Button[@index='6']     --- 1
+
+//*[@text='8']/ancestor::android.support.v4.view.ViewPager/preceding-sibling::*/android.widget.EditText[1]
+
+

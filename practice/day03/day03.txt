@@ -1,0 +1,88 @@
+案例:计算器,启动,关闭
+day03   demo3001
+com.android.calculator2
+.Calculator
+
+案例:app-welcome.apk
+aapt dump badging D:\Apks\app-welcome.apk
+com.example.power.welcomepage
+com.example.power.welcomepage.WelcomeActivity
+
+案例：MyAppDemo3   app3-debug.apk
+demo3003.py
+
+一.Inspector
+1.Appium Desktop(Appium桌面)提供了图形化界面,主要包括两个工具:Appium Server(Appium服务器)和Inspector(UI查看器,UI调查器)
+2.Inspector作用:用于查看被测App的源码,控件各个属性信息,还支持代码的录制,转换格式等功能,为测试人员提供书写代码时定位元素和操作元素的参考信息
+3.启动Inspector:
+(1)开始=>程序=>Appium,右键菜单中选择"以管理员身份运行"
+(2)点击Start Server
+(3)点击界面右上角放大镜图标(Start Inspector Session)
+(4)新出现的对话框中配置DesiredCapabilities对象key-value数据,用于为自动启动目标App做准备,其中大部分都是text类型,unicodeKeyboard和resetKeyboard是boolean类型,app是filePath类型,需要选择路径
+注意:该配置页上方保持默认的Automatic Server的选项,不要选择其他选项
+(5)另外:建议使用Save As将键值对信息保存下来,下次就可以通过Saved Capability Set来直接使用
+(6)点击Start Session,查看设备里已经启动了该目标App,并且设备里的当前界面与新打开的对话框中左侧的界面截图一致
+说明:此时不能运行调试自己在Pycharm里书写的测试代码,因为此时Inspector正在占用Appium Server和设备资源
+4.Inspector主界面介绍:
+(1)整个Inspector分为五个区域:上方工具栏,左侧App界面截图,中间居上是代码录制区(Recorder),中间居下是应用的源码区(App Source),右侧显示所选择的元素的详细控件属性信息(Selected Element)
+(2)工具栏的工具按钮依次是:Select Elements(选择元素,为了操作它或查看元素属性),Swipe By Coordinates(按绝对坐标位置来滑动,需要选择起点和终点),Tap By Coordinates(按绝对坐标位置点击),Back(返回上一个界面),Refresh(刷新源码和界面截图),Start/Pause Recording(开始和停止录制),Search For Element(搜索元素,用于校验定位条件是否正确),Copy(复制App源码到剪切板),Quit(退出/关闭Inspector)
+5.注意:如果上次代码运行失败,或Inspector未关闭,运行调试代码时,在Appium Server日志里报错
+[UiAutomator] UiAutomator exited unexpectedly with code 0, signal null
+解决方案一:重启模拟器,并且连接
+解决方案二:cmd,输入adb shell进入Android系统,使用ps|grep uiautomator查看进程的进程号,再结束进程 kill 进程号
+示例:
+C:\Users\zhang>adb shell
+root@vbox86p:/ # ps|grep uiautomator
+root      4094  135   825360 73820 sk_wait_da f7304cf3
+root@vbox86p:/ # kill 4094
+root@vbox86p:/ # ps|grep uiautomator
+1|root@vbox86p:/ #
+6.使用Inspector录制和复制脚本:
+(1)启动设备,启动Appium Server,启动Inspector
+(2)输入key-value,Start Session
+(3)点击工具栏的眼睛图标(Start Recording)
+(4)可以选择工具栏前三个按钮中的一个
+	a.如果选择第一个,左侧截图中点击选择一个元素,最右侧点击选择一个操作动作,Tap是代表点击,Send Keys输入数据,Clear清空
+	b.如果选择第二个,左侧截图中点击一个滑动起点和一个滑动终点
+	c.如果选择第三个,左侧截图中点击一个坐标点
+(5)点击工具栏停止录制按钮
+(6)在代码录制区Recorder中选择编程语言Python的选项,点击该区右侧第二个按钮来复制这些代码
+(7)粘贴到Pycharm里合适的位置
+(8)关闭Inspector,运行调试
+
+案例：计算器，录制3+5=的步骤，转换为Python格式，复制Python格式的代码后，粘贴到demo3002.py里启动App和关闭App之间。
+
+练习：再次启动Inspector，录制计算器7x9=的步骤，转换为Python格式，复制Python格式的代码后，粘贴到demo3002.py里等待3秒的步骤之前。
+
+
+练习:demo3001.py,使用Inspector录制在欢迎页上滑动来切换到下一张图片的步骤,粘贴到Pycharm里,并且导入类
+from appium.webdriver.common.touch_action import TouchAction
+关闭Inspector,运行调试
+
+练习:demo3004.py,测试app2-debug.apk,录制清空文本框,输入“达内”，点击OK，点击BIGGER的步骤，粘贴到启动该App和关闭该App的步骤之间，运行调试。
+com.example.tarena.myappdemo2
+com.example.tarena.myappdemo2.MainActivity2
+
+
+二.UiAutomatorViewer
+1.UiAutomatorViewer是Android SDK里下载的一个工具,用于分析Android界面上元素的属性信息
+2.路径:D:\Program Files\android-sdk-windows\tools\uiautomatorviewer.bat
+3.启动:进入该路径,运行bat文件
+4.建议:在该文件上右键菜单中选择=>发送到=>桌面快捷方式
+5.使用步骤:
+(1)从ftp下载app.png,app.uix,screencap_dump.bat
+(2)将app.png,app.uix复制到D盘根目录
+(3)将screencap_dump.bat复制到电脑桌面上
+(4)在模拟器设备中先手工打开要调查的App的界面,确认adb devices连接状态是已连接
+(5)双击桌面上的screencap_dump.bat
+(6)双击桌面上的uiautomatorviewer.bat的快捷方式来启动该工具
+(7)点击该工具界面上工具栏中的第一个按钮(打开Open)
+(8)选择Screenshot为D:\app.png,选择UI XML dump为D:\app.uix,点击OK
+(9)点击左侧截图中的某个页面元素,在右侧查看该元素的源代码和元素的属性列表
+6.优点:不影响Pycharm里代码的运行
+7.缺点:不太稳定,而且一次只能截一个界面的图
+
+案例:MyAppDemo2的界面
+
+练习:用UiAutomatorViewer调查计算器的界面
+

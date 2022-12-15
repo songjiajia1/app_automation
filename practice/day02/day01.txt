@@ -1,0 +1,122 @@
+一.Appium概述
+1.Appium是移动端功能自动化测试的工具.
+2.支持:
+(1)多种移动端操作系统:Android,iOS等
+(2)多种PC端操作系统里书写测试代码:Windows,Linux,Mac等
+(3)多种编程语言:Python,Java,Php等
+3.特点:开源,免费,跨平台,跨语言
+4.缺点:搭建测试环境比较复杂,不兼容低版本的Android系统,有些页面元素属性信息无法获取
+5.Appium实现原理:测试脚本<==>Appium Server<==>移动端设备(手机)  ---了解!
+(1)测试脚本对于Appium来说是客户端,交互是使用HTTP请求来完成,数据使用JSON字符串的格式来传输的
+(2)Appium启动服务时,监听4723端口,支持标准WebDriver协议
+(3)Appium Server会解析请求,调用设备上的Bootstrap.jar的中间件(监听4724端口),这个中间件再去调用各个操作系统里的自带的自动化测试框架(Android:UiAutomator, IOS:UiAutomation)来执行命令操作设备上的App,将结果返回给Appium Server,Appium Server再返回给客户端测试脚本
+6.Appium官网:http://appium.io/
+下载最新版本的Appium:Download Appium
+7.DesiredCapabilities：是在发送HTTP请求给Appium服务器启动Session（会话）时，必须要指定的一个参数对象，它用于描述操作哪台设备？设备的操作系统是什么（Android还是IOS），设备操作系统的版本号是多少？以及操作的是该设备上的哪个App，使用哪个初始界面来展示？等等。在Python版本Appium测试代码中，使用字典类型来表示该对象。
+
+
+二.搭建Appium自动化测试环境
+1.安装jdk:
+(1)建议版本1.8.0,安装包
+D:\Software tools\Appium\jdk-8u111-windows-x64.exe
+(2)安装路径:C:\Program Files\Java\jdk1.8.0_111
+(3)配置系统环境变量:
+JAVA_HOME  ---注意：没有分号结尾
+C:\Program Files\Java\jdk1.8.0_111
+修改Path  ---
+把以下两个路径加入到系统级别的环境变量Path的开头处:
+写法一：
+C:\Program Files\Java\jdk1.8.0_111\bin;
+C:\Program Files\Java\jdk1.8.0_111\jre\bin;
+写法二：
+%JAVA_HOME%\bin;
+%JAVA_HOME%\jre\bin;
+注意:每个路径后都需要加分号来分隔
+(4)检查java环境:cmd命令行窗口里输入
+java -version
+查看结果是java version "1.8.0_111"就代表正确
+2.安装配置Android SDK(软件开发工具包):
+(1)免安装的压缩包:D:\Software tools\Appium\android-sdk_r24.4.1-windows.zip
+(2)解压缩到指定文件夹:D:\Program Files\android-sdk-windows
+(3)运行该文件夹下的SDK Manager.exe,通过工具Tools=>Options菜单来配置代理服务器地址(HTTP Proxy Server)和端口号(国内SDK开源镜像站),例:mirrors.zzu.edu.cn,80,点击Close,可以提升下载资源速度
+(4)然后勾选希望使用的工具资源,例如:Tools=>Tools和Build-tools(一般用最新版即可)和platform-tools前面的复选框,点击Install packages,下一个界面选择Accept License,点击Install,安装完毕关闭它
+(5)检查几个常用的工具:
+D:\Program Files\android-sdk-windows\tools\uiautomatorviewer.bat
+D:\Program Files\android-sdk-windows\platform-tools\adb.exe
+D:\Program Files\android-sdk-windows\build-tools\28.0.3\aapt.exe
+(6)测试:cmd命令行窗口里,输入adb回车,查看adb版本号是1.0.40
+(7)配置环境变量:在Path开头处增加几个路径写法一：
+D:\Program Files\android-sdk-windows\tools;
+D:\Program Files\android-sdk-windows\platform-tools;
+D:\Program Files\android-sdk-windows\build-tools\28.0.3;
+写法二：
+ANDROID_HOME
+D:\Program Files\android-sdk-windows
+Path开头增加
+%ANDROID_HOME%\tools;
+%ANDROID_HOME%\platform-tools;
+%ANDROID_HOME%\build-tools\28.0.3;
+注意:加完Path后,要重启cmd命令行窗口,该配置才会生效；试着运行set path命令来查看path；试着输入adb命令，回车查看结果；试着输入aapt命令，回车查看结果。
+3.安装Appium Desktop(Appium桌面)
+(1)Appium Desktop是一个集成了Appium Server的小工具,它有图形化界面,方便操作和使用
+(2)三种方式安装Appium Server:
+	a.AppiumForWindows:停止更新,只支持旧版本的Appium Server,有图形化界面
+	b.Appium Desktop:持续更新中,支持较新版本的Appium Server,有图形化界面,方便使用,建议使用这种方式
+	c.使用命令方式安装NodeJS,NPM,然后再安装最新版本的Appium,这种方式操作较复杂,没有图形化界面,初学者不建议使用
+(3)安装包:D:\Software tools\Appium\appium-desktop-setup-1.11.0.exe
+(4)注意:安装和使用时,都必须以管理员身份来运行
+(5)高级配置中时间戳配置:开始=>程序=>Appium,使用右键菜单中的"以管理员身份运行",打开Appium Desktop界面后,选择上方的Advanced(高级),勾选"Log Timestamps"复选框,点击Start Server后,可以看到日志中显示每行日志的记录时间
+(6)Appium默认监听4723端口
+4.安装Appium Python Client:Python语言版本的客户端驱动包(就是代码资源库)
+(1)需要提前安装Python
+(2)在线方式安装Appium Python Client:
+	a.启动cmd
+	b.确保pip命令可用
+	c.输入命令
+pip install Appium-Python-Client
+或pip3 install Appium-Python-Client
+(3)安装路径:C:\Python\Python37\Lib\site-packages
+appium,selenium,urllib3
+(4)如果安装时提示"pip不是内部或外部命令",先执行命令安装pip,然后再安装Appium-Python-Client
+安装pip: Python -m ensurepip
+(5)建议将pip所在文件夹路径加入Path:C:\Python\Python37\Scripts
+(6)检查是否安装成功:开始=>程序=>Python3.7=>IDLE中输入以下代码
+from appium import webdriver
+回车没有报错,就代表已经安装成功
+
+补充：如果IDLE里可以使用appium模块，在Pycharm里某个工程内无法使用，那么需要使用Pycharm菜单中File=>Settings=>左侧选择Project:工程名称=》右侧点击Project Interpreter（工程解释器）=》选择Project Interpreter的版本与pip所属的Python路径一致，确认下方列表里存在Appium-Python-Client模块才能使用。
+
+5.手机模拟器
+(1)说明:如果有真机,可以不安装模拟器
+(2)常用的Android模拟器:Genymotion,夜神模拟器,雷电模拟器,逍遥模拟器,ADT自带的AVD
+(3)如果使用真机,使用USB数据线连接真机设备到电脑上,在手机上选择USB连接方式为"设备文件管理"的选项,不要选择"充电"的选项
+(4)Genymotion模拟器使用前,需要先到官网注册账号,到邮箱激活账号,下载安装包,安装后使用你注册过的账号来登录模拟器,选择Personal Use(个人使用),是免费的
+(5)官网:
+https://www.genymotion.com/download/
+(6)安装包:D:\Software tools\Appium\genymotion-2.12.2-vbox.exe
+(7)启动:开始=>程序=>Genymotion=>Genymotion
+(8)添加设备:Add
+注意：需要先到Settings里Sign-in(登录)后，才能Add添加虚拟设备。
+
+(9)配置Genymotion的SDK环境:启动Genymotion后,点击Settings,切换到ADB,选择第二个单选按钮Use custom Android SDK tools,点击Browse,选择D:\Program Files\android-sdk-windows,看到一个对号，关闭Settings窗口。
+(10)配置支持中文输入:启动Genymotion后,关闭各个设备,点击列表中的某一台设备,点击设备名称后面扳手工具的图标,勾选Use virtual keyboard for text input复选框,OK
+(11)启动设备:列表中选择一个设备,点击Start
+(12)检查电脑与模拟器设备连接是否成功--重要!!!
+	a.cmd,输入adb devices
+	b.查看到列表里有5555端口号的记录,就代表Genymotion模拟器设备已经连接到电脑上
+(13)如果未自动连接成功,我们可以手动连接电脑和模拟器设备
+	a.启动设备后,在开始=>程序=>Genymotion=>Genymotion Shell
+	b.输入命令devices list，回车
+	c.查看结果中Status状态是On的记录,记住IP地址,例如192.168.13.101
+	d.启动cmd,输入adb connect IP地址:5555,例如:
+adb connect 192.168.13.101:5555
+	e.最后在cmd里,再次使用adb devices确认连接结果
+(14)注意:一定要保证设备和电脑是连接成功的,才能正常运行调试代码
+(15)修改设备里的系统语言:
+	a.启动模拟器设备,如果是Android 6.0,
+Settings=>Language&Input=>Language=>中文(简体)
+	b.启动Android 8.0,Settings=>System=>Language&Input=>Language=>+ Add a Language=>选择简体中文=>选择中国=>拖拽简体中文到英文上方
+	c.说明:DemoCalculator.py测试的是操作系统自带的计算器,系统语言修改为中文以后,代码也需要修改
+"plus"   =>  "加"
+"equals"  => "等于"
+

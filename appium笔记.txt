@@ -1,0 +1,154 @@
+电脑连接木木模拟器
+命令行输入：adb connect 127.0.0.1:7555adb
+         adb devices
+
+获取app信息
+1.通过logcat日志获取 '包名和页面名'
+    adb logcat ActivityManager:I | findstr "cmp"
+2.通过aapt获取 '包名和页面名'
+    aapt dump badging 包名.apk | findstr launchable-activity
+
+
+安装apk包的命令：
+    adb install -r .apk包的完整路径
+或者在手机右下角点击设置-安装，就可以安装apk包了
+
+
+命令行启动应用的命令：
+adb shell am start -n com.android.browser/.BrowserActivity
+
+启动应用，就是热启动，会进入到app的首页
+# 方式一：
+self.driver = webdriver.Remote("http://127.0.0.1:4723/wd/hub", desire_cap)
+# 方式二：
+self.driver.launch_app()
+
+
+
+公共部分参数配置
+platformName	使用的手机操作系统
+platformVersion	手机操作系统的版本
+deviceName	    设备的名字
+automationName	使用哪个自动化引擎
+noReset	        在应用启动的时候，不做清空缓存的操作。可以设置成 true，默认值为 false
+udid	        设备的唯一设备编号 (Unique device identifier)
+
+Android 部分特有参数配置
+appActivity	        Activity 的名字是指从你的包中所要启动的 Android acticity 启动页的名字
+appPackage	        运行的 Android 应用的包名
+appWaitActivity	    用于等待启动某个应用成功后，再进行后续操作的 Android Activity 名称
+unicodeKeyboard	    启用 Unicode 中文输入法，可以设置成 true，默认为 false
+resetKeyboard       重置键盘
+dontStopAppOnReset	首次启动的时候，不停止 app 可以设置成 true，
+skipDeviceInitialization	跳过安装和初始化，权限设置等操作 可以设置成 true
+
+iOS 独有参数配置
+bundleId	被测应用的 bundle ID 。用于在真实设备中启动测试，也用于使用其他需要 bundle ID 的关键字启动测试。在使用 bundle ID 在真实设备上执行测试时，你可以不提供 app 关键字，但你必须提供 udid
+autoAcceptAlerts	当 iOS 的个人信息访问警告 (如 位置、联系人、图片) 出现时，自动选择接受( Accept )。可以设置成 true，默认值 false
+showIOSLog	是否在 appium 日志中显示从设备捕获的任何日志。可以设置成 true，默认 false
+
+
+Android 七大布局：
+LinerLayout（线性布局）
+RelativeLayout（相对布局）
+FrameLayout（帧布局）
+AboluteLayout（绝对布局）
+TableLayout（表格布局）
+GridLayout（网格布局）
+ConstraintLayout（约束布局）
+
+
+Android 四大组件：
+activity 与用户交互的可视化界面，就是页面展示
+service 实现程序在后台运行
+content provider 内容提供者，提供程序所需要的数据
+broadcast receiver 广播接收器，监听外部事件的到来（比如来电/短信/推送）
+
+
+常用的控件：
+TextView（文本控件），EditText（可编辑文本控件）
+Button（按钮），ImageButton（图片按钮），ToggleButton（开关按钮）
+ImageView（图片控件）
+CheckBox（复选框控件），RadioButton（单选框控件）
+
+控件基础知识：
+dom：Document Object Model 文档对象模型
+dom 应用：用于表示界面的控件层级，界面的结构化描述
+常见的格式：html、xml
+核心元素：节点、属性
+xpath：xml 路径语言，用于 xml 中的节点定位
+
+Anrdroid 应用的层级结构与 html 不一样，是一个定制的 xml
+app source 类似于 dom ，表示 app 的层级，代表了界面里面所有的控件树的结构
+每个控件都有它的属性（resourceid，xpath，aid），但是没有 css 属性
+
+IOS 与 Android dom 的区别
+dom 属性和节点结构类似
+名字和属性命名不同
+android 的 resourceid 和 ios 的 name
+android 的 content-desc 和 ios 的 accessibility-id
+
+
+测试步骤三要素
+定位、交互、断言
+
+定位方式：
+id 定位
+accessibilty_id 定位
+xpath 定位
+classname 定位（不推荐）
+
+APP定位方式
+定位策略：	         描述：
+Accessibility ID	识别一个唯一的 UI 元素，对于 XCUITest 引擎，它对应的的属性名是 accessibility-id，对于 Android 系统的页面元素，对应的属性名是 content-desc
+Class name	        对于 iOS 系统，它的 class 属性对应的属性值会以XCUIElementType开头，对于 Android 系统，它对应的是 UIAutomator2 的 class 属性(e.g.: android.widget.TextView)
+ID	                原生元素的标识符,Android 系统对应的属性名为resource-id,iOS 为name
+XPath	            使用 xpath 表达式查找页面所对应的 xml 的路径（不推荐，存在性能问题）
+Image	            通过匹配 base 64 编码的图像文件定位元素
+Android UiAutomator(UiAutomator2 only)	使用 UI Automator 提供的 API, 尤其是 UiSelector 类来定位元素，在 Appium 中，会发送 Java 代码作为字符串发送到服务器，服务器在应用程序的环境中执行这段代码，并返回一个或多个元素
+Android View Tag (Espresso only)	    使用 view tag 定位元素
+Android Data Matcher (Espresso only)	使用 Espresso 数据匹配器定位元素
+IOS UIAutomation	在 iOS 应用程序自动化时，可以使用苹果的 instruments 框架查找元素
+
+XPATH 定位
+单属性：//*[@属性名='属性值']
+多属性：//*[@属性名='属性值' and @属性名='属性值' ]
+
+
+android 原生定位：
+1.单属性定位：
+格式 'new UiSelector().属性名("<属性值>")'
+比如：'new UiSelector().resourceId("android:id/text1")'
+注意外面是单引号，里面是双引号，顺序不能变
+可以简写为 属性名("<属性值>")'
+比如：·resourceId("android:id/text1")
+
+2.组合定位
+'new UiSelector().resourceId("android:id/text1").text("App")'
+
+3.模糊匹配
+文字定位：new UiSelector().text("^xxx.*")
+包含文字：new UiSelector().textContains("^xxx.*")
+正则匹配：new UiSelector().textMatches("^xxx.*")
+以什么字母开头：new UiSelector().textStartsWith("^xxx.*")
+
+4.层级定位
+兄弟元素定位：fromParent() 方法可以查找兄弟结点。
+new UiSelector().text("App").fromParent(text("App的兄弟节点"))
+父子结点定位：childSelector() 方法查找子结点 / 子孙结点。      可以传入 resourceId() , description() 等方法
+new UiSelector().className("父节点").childSelector(text("子孙节点"))
+
+5.滑动查找元素
+new UiScrollable(new UiSelector().scrollable(true).instance(0)).scrollIntoView(new UiSelector().text("查找的元素文本").instance(0))
+
+TouchAction(driver).press(x=712, y=680).move_to(x=51, y=675).release().perform()
+
+# 用class_name定位，element后边要+s,最后边要加上索引号
+s = driver.find_elements(MobileBy.CLASS_NAME,"android.widget.EditText")[1]
+
+
+
+总结
+Appium 提供多种元素定位方式，id，xpath, class, 也可以通过 Android Uiautomator 定位，或 iOS Predicate
+xpath 是比较灵活的定位方式（后面有章节详细介绍高级用法）
+原生定位了解即可

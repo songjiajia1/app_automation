@@ -1,0 +1,160 @@
+案例：app-welcome.apk   WelcomePage
+day06  demo6001.py 启动App  关闭App
+
+一.模拟手势操作
+1.Appium做移动端设备模拟手势操作时,使用TouchAction和MultiAction类来实现
+(1)TouchAction:模拟单点触控(一根手指操作),包括轻触(点击,按下后再抬起),短按(只按下不抬起),等待,移动,释放(抬起),组合形成滑动的操作效果
+(2)MultiAction:模拟多点触控(多根手指同时操作),包括添加TouchAction对象到MultiAction集合中,批量执行等方法
+2.导入的语法
+from appium.webdriver.common.touch_action import TouchAction
+from appium.webdriver.common.multi_action import MultiAction
+
+左上角：[0,48]   x=0  y=48
+右下角：[768,1184]   x=768  y=1184
+
+48+(1184-48)/2
+
+3.注意:在调用TouchAction或MultiAction完成具体的操作动作函数之后,必须最后要调用执行(perform)的函数才能模拟手势操作动作完成该动作
+4.TouchAction里常用的函数:
+(1)tap:轻触(点击)
+	a.可以点击某元素,也可以点击某坐标点位置,一般用于后者较多,因为前者也可以定位元素后直接调用click函数来实现
+	b.按坐标位置操作缺点:代码可维护性差,一旦设备的屏幕分辨率有变化,可能点击的位置错误
+示例:
+# 通过坐标点位置来点击8
+ta1=TouchAction(driver)
+ta1.tap(x=300,y=600)
+ta1.perform()
+(2)press:短按(按住不释放),一般不单独使用,而是与其他函数一起组合使用,参数也可以是元素对象,也可以是坐标位置
+(3)wait:等待,参数是毫秒数(int型)
+(4)move_to:移动,一般前面会有press动作,参数也可以是元素对象,也可以是坐标位置(终点的坐标位置)
+(5)release:释放(抬起手指),一般不单独使用,无参
+(6)perform:执行前面一系列组合好的操作动作,无参
+(7)long_press:长按,参数也可以是元素对象,也可以是坐标位置
+5.滑动操作:组合press(按下),wait(等待),move_to(移动),wait(等待),release(释放),perform(执行)
+示例:
+# 滑动翻页(查看下一张图片)
+# 起点:(700,600),终点:(100,600)
+ta1=TouchAction(driver)
+ta1.press(x=700,y=600).wait(500).move_to(x=100,y=600).wait(500).release()
+ta1.perform()
+6.说明:更建议使用相对坐标值来代表坐标位置,这样换了一个其他分辨率的手机也可以找到原来的大概位置
+(1)获得屏幕分辨率,返回数据类型是字典类型
+fbl=driver.get_window_size()
+(2)获得width这个key的值,就得到屏幕宽度
+w=fbl["width"]
+(3)获得height这个key的值,就得到屏幕高度
+h=fbl["height"]
+(4)对宽度和高度乘以某个百分比,就可以得到相对坐标位置
+示例:
+# 起点:(w*0.9,h*0.5),终点:(w*0.1,h*0.5)
+ta2=TouchAction(driver)
+ta2.press(x=w*0.9,y=h*0.5).wait(500).move_to(x=w*0.1,y=h*0.5).wait(500).release()
+ta2.perform()
+
+练习:用
+D:\Apks\de.penguindevelopers.paint_2.0_liqucn.com.apk安装画图板的App(名称是Paint),书写代码启动该App,要求在中间位置从上向下画一条竖线,等待3秒,关闭App
+提示：起点  x=w*0.5   y=h*0.3
+       终点  x=w*0.5   y=h*0.8
+demo6002.py
+de.penguindevelopers.paint
+de.penguindevelopers.paint.main
+
+7.连续滑动:在滑动的操作中多次调用move_to函数来连续滑动
+示例:
+# 画折线(L型)
+ta2=TouchAction(driver)
+ta2.press(x=w*0.6,y=h*0.4).wait(500).move_to(x=w*0.6,y=h*0.6).wait(500).move_to(x=w*0.8,y=h*0.6).wait(500).release()
+ta2.perform()
+
+练习:在竖线左侧再画一条折线(Z字型)
+
+8.多点触控(多根手指同时操作)
+(1)分析每根手指的具体操作动作,封装为相应多个TouchAction对象,注意最后不要调用perform函数来执行动作
+(2)新建MultiAction对象,使用add函数来一个一个的增加TouchAction,最后再调用MultiAction对象的perform函数来批量统一同时执行这些动作
+示例:
+# 缩小
+# 第一根手指(w*0.2,h*0.2)-->(w*0.4,h*0.4)
+ta1=TouchAction(driver)
+ta1.press(x=w*0.2,y=h*0.2).wait(500).move_to(x=w*0.4,y=h*0.4).wait(500).release()
+# 第二根手指(w*0.8,h*0.8)-->(w*0.6,h*0.6)
+ta2=TouchAction(driver)
+ta2.press(x=w*0.8,y=h*0.8).wait(500).move_to(x=w*0.6,y=h*0.6).wait(500).release()
+# 添加到MultiAction对象中
+ma1=MultiAction(driver)
+ma1.add(ta1,ta2)
+# 执行
+ma1.perform()
+
+
+案例:app8-debug.apk
+com.example.app8
+com.example.app8.MainActivity
+
+二.unittest框架
+1.Appium测试时,使用unittest框架来复用代码,来实现数据的检查,批量运行等
+2.集成unittest框架的实现步骤:
+(1)新建Python unit test的文件中,新建setUp和tearDown函数
+(2)setUp函数体中书写启动App的步骤,修改原来的driver为self.driver
+示例:
+   def setUp(self):
+        # 启动App
+        dc={
+  "platformName": "Android",
+  "platformVersion": "6.0",
+  "deviceName": "Android Emulator",
+  "appPackage": "com.android.calculator2",
+  "appActivity": ".Calculator",
+  "unicodeKeyboard": True,
+  "resetKeyboard": True
+}
+        self.driver=webdriver.Remote("http://127.0.0.1:4723/wd/hub",dc)
+(2)实现tearDown函数体关闭App的步骤,将driver改为self.driver
+示例:
+    def tearDown(self):
+        # 关闭App
+        self.driver.quit()
+(3)实现test开头的测试函数的函数体,包括定位,操作,检查的步骤,
+将driver改为self.driver
+示例:
+    def test_something(self):
+        # 点击3
+        n3=self.driver.find_element(MobileBy.ANDROID_UIAUTOMATOR,'text("3")')
+        n3.click()
+        sleep(3)
+3.说明:如果unittest框架的代码运行结束,但是log中出现ResourceWarning
+解决方案:
+(1)导入warnings模块
+import warnings
+(2)在setUp函数体中启动App之前,增加一行代码忽略ResourceWarning类型的警告
+示例:
+import warnings
+
+class MyTestCase(unittest.TestCase):
+    def setUp(self):
+        warnings.simplefilter("ignore",ResourceWarning)
+4.常用的检查(断言):
+(1)获得某个元素内的文本,检查文本是否正确
+说明:包括文本框,按钮,纯文本(提示信息),弹出框的文本,复选框上的文本等等
+实现步骤:定位元素后,Appium所封装的页面元素对象都有text属性,获得其text属性值就可以检查
+示例:
+        jgwbk=self.driver.find_element(MobileBy.ID,"result")
+        jg=jgwbk.text
+        self.assertEqual(jg,"8")
+(2)检查单选按钮或复选框是否被选中:使用get_attribute函数获得checked属性的值(将"checked"作为函数的参数),检查等于"true"或"false"代表是否选中的状态
+注意:不是bool类型,是str类型数据作为预期值
+示例:
+nan=self.driver.find_element(MobileBy.ACCESSIBILITY_ID,"性别男")
+zt=nan.get_attribute("checked")
+self.assertEqual(zt, "true")
+
+
+        # 检查界面跳转到取消理由填写页
+        a=self.driver.current_activity
+        print(a)
+        self.assertEqual(a,".CancelActivity")
+
+
+aapt dump badging D:\Apks\app3-debug.apk
+com.example.myappdemo3
+com.example.myappdemo3.MainActivity
+
